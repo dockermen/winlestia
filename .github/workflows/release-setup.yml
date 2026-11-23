@@ -1,0 +1,51 @@
+name: Release Setup Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Native components (MSVC)
+        shell: pwsh
+        run: ./tools/build-native.ps1
+
+      - name: Inno Setup 6
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) {
+            choco install innosetup --no-progress -y
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          if (-not (Test-Path $iscc)) { throw 'ISCC.exe introuvable apres installation.' }
+
+      - name: Build setup
+        shell: pwsh
+        run: |
+          $env:TEMP = Join-Path $PWD 'tmp'
+          $env:TMP = $env:TEMP
+          New-Item -ItemType Directory -Force -Path $env:TEMP | Out-Null
+          ./installer/build-setup.ps1 -Embed
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: winlestia-setup-release
+          path: build/out/WinlestiaSetup.exe
+          if-no-files-found: error
