@@ -6,7 +6,7 @@ from pathlib import Path
 from PySide6.QtCore import QTranslator
 
 I18N_DIR = Path(__file__).resolve().parent / 'i18n'
-LANGUAGES = ('fr', 'en', 'es', 'ru')
+LANGUAGES = ('fr', 'en', 'es', 'ru', 'zh')
 
 
 def load_table():
@@ -31,7 +31,7 @@ def windows_language():
         ctypes.windll.kernel32.GetUserDefaultUILanguage.restype = ctypes.c_ushort
         ident = ctypes.windll.kernel32.GetUserDefaultUILanguage()
         primary = ident & 0x3FF
-        return {12: 'fr', 9: 'en', 10: 'es', 25: 'ru'}.get(primary, 'en')
+        return {12: 'fr', 9: 'en', 10: 'es', 25: 'ru', 4: 'zh'}.get(primary, 'en')
     except Exception:
         return 'en'
 
