@@ -1,4 +1,4 @@
-name: Release Setup Build
+﻿name: Release Setup Build
 
 on:
   workflow_dispatch:
@@ -47,5 +47,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: winlestia-setup-release
-          path: build/out/WinlestiaSetup.exe
+          path: |
+            build/setup/WinlestiaSetup.exe
+            build/setup/*.exe
+            build/setup/*.zip
           if-no-files-found: error
